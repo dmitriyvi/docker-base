@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  php-fpm:
+    network_mode: "bridge"
+    build:
+      context: .
+      dockerfile: ./php/Dockerfile
+
+  nginx:
+    network_mode: "bridge"
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    restart: always

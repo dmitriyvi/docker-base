@@ -1,0 +1,56 @@
+version: '2'
+
+services:
+  php-fpm:
+    restart: always
+    build:
+      args:
+        - PROJECT_ENV=local
+        - INSTALL_XDEBUG=false
+        - INSTALL_OPCACHE=false
+    extends:
+      file: docker-compose.yml
+      service: php-fpm
+    expose:
+      - "9000"
+    volumes:
+      - ./project:/var/www/project
+    depends_on:
+      - mysql
+    links:
+      - mysql
+
+#  composer:
+#    extends:
+#      file: docker-compose.yml
+#      service: php-fpm
+#    command: composer install
+#    volumes_from:
+#      - php-fpm
+#    depends_on:
+#      - php-fpm
+
+  nginx:
+    extends:
+      file: docker-compose.yml
+      service: nginx
+    build:
+      args:
+        - PROTO=http
+    volumes:
+      - /home/fileserver/somelc/nginx:/var/log/nginx
+      - ./project:/var/www/project
+    links:
+      - php-fpm
+    environment:
+      - VIRTUAL_HOST=some.lc
+
+  mysql:
+    network_mode: "bridge"
+    image: mysql:5.7
+    restart: always
+    volumes:
+      - /home/fileserver/somelc/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=test_db
+      - MYSQL_ROOT_PASSWORD=123456
